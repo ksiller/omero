@@ -3,7 +3,10 @@
 #@ String (label="Omero Server", value="omero.hpc.virginia.edu") server
 #@ Integer (label="Omero Port", value=4064) server_port
 #@ Integer (label="Omero Group ID", min=-1, value=-1) omero_group_id
-#@ Integer (label="Omero Dataset ID", min=-1, value=-1) dataset_id
+#@ Integer (label="Omero Input Dataset ID", min=-1, value=-1) dataset_id
+#@ String (label="Omero Output Dataset Name", value="Processed Images") target_ds_name
+#@ Integer (label="Omero Output Project ID", min=-1, value=-1) project_id
+
 
 import os
 from os import path
@@ -18,6 +21,7 @@ import java
 
 # Omero Dependencies
 import omero
+from omero.rtypes import rstring
 from omero.gateway import Gateway
 from omero.gateway import LoginCredentials
 from omero.gateway import SecurityContext
@@ -122,8 +126,22 @@ def get_image_ids(gateway, dataset_id):
 def process_file(imp):
 	"""Invert pixels."""
 	print "Processing", imp.getTitle()
-	IJ.run(imp, "Invert", "");
+	IJ.run(imp, "Invert", "stack");
 	return imp
+
+def createAndLinkDataset(gateway, project_id, ds_name):
+    ds_obj = omero.model.DatasetI()
+    ds_obj.setName(rstring(ds_name))
+    ctx = SecurityContext(gateway.getLoggedInUser().getGroupId())
+    ds_obj = gateway.getUpdateService(ctx).saveAndReturnObject(ds_obj)
+
+    if project_id != -1:
+        link = omero.model.ProjectDatasetLinkI()
+        link.setParent(omero.model.ProjectI(project_id, False))
+        link.setChild(ds_obj)
+        gateway.getUpdateService(ctx).saveObject(link)
+    
+    return ds_obj.getId().getValue() 
 	
 # Main code
 
@@ -133,6 +151,8 @@ tmp_dir = os.path.join(os.path.expanduser('~'), 'omero_tmp')
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
 print tmp_dir
+
+target_ds_id = createAndLinkDataset(gateway, project_id, target_ds_name)
 for info in image_info:
 	imp = open_image(username, password, server, server_port, omero_group_id, info['Image Id'])
 	imp = process_file(imp)
@@ -149,7 +169,7 @@ for info in image_info:
 	imp.close()
 
 	# export to OMERO
-	upload_image(gateway, server, dataset_id, [filepath])
+	upload_image(gateway, server, target_ds_id, [filepath])
 
 gateway.disconnect()	
 

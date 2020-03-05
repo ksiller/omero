@@ -3,10 +3,9 @@
 % Sample MATLAB Image Processing pipeline with OMERO
 
 %%%%%%%%%
-
 %% Log into OMERO
 
-myUsername = 'cag3fr';
+myUsername = 'khs3z';
 myPassword = '';
 
     
@@ -17,13 +16,11 @@ client = loadOmero('omero.hpc.virginia.edu',4064);
 session = client.createSession(myUsername, myPassword);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 %% Specify the Project and Dataset containing raw data
 
 projectID = 107;
 
 datasetID = 163;
-
 %% Each image is processed and analyzed, then exported back to OMERO
 
 %%%%% Don't change anything below this line! %%%%%
@@ -86,6 +83,7 @@ end
 client.closeSession();
 
 
+%%
 function I3 = contrastIncrease(image)
 
     I = image;
