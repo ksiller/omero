@@ -5,8 +5,8 @@
 %%%%%%%%%
 %% Log into OMERO
 
-myUsername = 'khs3z';
-myPassword = '';
+myUsername = 'YOUR_ID';
+myPassword = 'YOUR_PASSWORD';
 
     
 %%%%% Don't change anything in this section! %%%%%
@@ -30,7 +30,7 @@ datasetName = char(dataset.getName().getValue());
 imageList = dataset(1).linkedImageList;
 imageList = imageList.toArray.cell;
 
-newdataset = createDataset(session, 'binarized', ...
+newdataset = createDataset(session, 'Colon Cancer Analysis', ...
     getProjects(session,projectID));
 
 for i = 1:length(imageList)

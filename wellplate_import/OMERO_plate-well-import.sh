@@ -2,7 +2,7 @@
 
 # OMERO Screen-Plate-Well Import Script
 
-USER=cag3fr
+USER='YOUR_ID'
 PASSWORD=''
 
 
