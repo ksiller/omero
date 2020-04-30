@@ -1,7 +1,7 @@
 #@ String (label="Omero User") username
 #@ String (label="Omero Password", style="password") password
 #@ String (label="Omero Server", value="omero.hpc.virginia.edu") server
-#@ Integer (label="Omero Port", value=4064) server_port
+#@ Integer (label="Omero Port", value=4064) port
 #@ Integer (label="Omero Group ID", min=-1, value=-1) group_id
 
 
@@ -23,12 +23,12 @@ from omero.log import SimpleLogger
 
 
 
-def connect(group_id, username, password, host, port):    
-    '''Omero Connect with credentials and simpleLogger'''
+def connect(group_id, username, password, server, port):    
+    """Omero Connect with credentials and simpleLogger"""
     cred = LoginCredentials()
     if group_id != -1:
     	cred.setGroupID(group_id)
-    cred.getServer().setHostname(host)
+    cred.getServer().setHostname(server)
     cred.getServer().setPort(port)
     cred.getUser().setUsername(username)
     cred.getUser().setPassword(password)
@@ -39,6 +39,7 @@ def connect(group_id, username, password, host, port):
 
 
 def get_groups(gateway):
+	"""Retrieves the groups for the user"""
 	currentGroupId = gateway.getLoggedInUser().getGroupId()
 	ctx = SecurityContext(currentGroupId)
 	adminService = gateway.getAdminService(ctx, True)
@@ -56,6 +57,7 @@ def get_groups(gateway):
 
 
 def get_projects_datasets(gateway):
+	"""Retrieves the projects and datasets for the user"""
 	results = []
 	proj_dict = {}
 	ds_dict = {}
@@ -100,7 +102,7 @@ def get_projects_datasets(gateway):
 
 
 def get_images(gateway, datasets, orphaned=True):
-	'''Return all image ids and image names for provided dataset ids'''
+	"""Return all image ids and image names for provided dataset ids"""
 	browse = gateway.getFacility(BrowseFacility)
 	experimenter = gateway.getLoggedInUser()
 	ctx = SecurityContext(experimenter.getGroupId())
@@ -130,6 +132,7 @@ def get_images(gateway, datasets, orphaned=True):
 
 
 def show_as_table(title, data, order=[]):
+    """Helper function to display group and data information as a ResultsTable"""
     table = ResultsTable()
     for d in data:
         table.incrementCounter()
@@ -141,18 +144,13 @@ def show_as_table(title, data, order=[]):
 
 
 # Main code
-
-gateway = connect(group_id, username, password, server, server_port)
+gateway = connect(group_id, username, password, server, port)
 
 groups, current_group = get_groups(gateway)
 show_as_table("My Groups", groups, order=['Id', 'Name'])
 
 all_data,_,datasets = get_projects_datasets(gateway)
 show_as_table("Projects and Datasets - Group: %s" % current_group, all_data, order=['Group Id', 'Dataset Id', 'Dataset Name', 'Project Name', 'Project Id'])
-
-# created sorted list of unique dataset ids
-image_ids = get_images(gateway, datasets, orphaned=True)
-show_as_table("Images - Group: %s" % current_group, image_ids, order=['Dataset Id', 'Dataset Name', 'Image Id', 'Image Name'])
 
 gateway.disconnect()	
 

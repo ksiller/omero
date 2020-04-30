@@ -5,7 +5,7 @@
 %%%%%%%%%
 %% Log into OMERO
 
-myUsername = 'khs3z';
+myUsername = 'mst3k';
 myPassword = '';
 
     
